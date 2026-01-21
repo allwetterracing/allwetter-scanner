@@ -5,161 +5,132 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>IGNITION Ticket Check</title>
     <style>
-        body {
-            font-family: 'Courier New', Courier, monospace; /* Passt zum Ticket Design */
-            background-color: #111;
-            color: white;
-            text-align: center;
-            padding: 20px;
-            margin: 0;
+        /* Clean & Minimal Design */
+        body { 
+            font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; 
+            background-color: #050505; 
+            color: #ffffff; 
             display: flex;
-            flex-direction: column;
             align-items: center;
             justify-content: center;
             min-height: 100vh;
+            margin: 0;
+            -webkit-font-smoothing: antialiased;
         }
-        .card {
-            background: #222;
-            padding: 20px;
-            border-radius: 10px;
-            width: 100%;
-            max-width: 400px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+        .card { 
+            width: 90%;
+            max-width: 380px;
+            padding: 40px 20px;
+            text-align: center;
         }
-        h1 { margin-top: 0; text-transform: uppercase; }
-        .status-box {
-            padding: 20px;
-            margin: 20px 0;
-            border-radius: 5px;
-            font-weight: bold;
-            font-size: 24px;
+        #logo { 
+            max-width: 220px; 
+            margin-bottom: 50px; 
+        }
+        .status-box { 
+            padding: 15px; 
+            margin-bottom: 30px; 
+            border-radius: 4px; 
+            font-weight: 600; 
+            font-size: 14px; 
+            letter-spacing: 2px;
             text-transform: uppercase;
+            transition: all 0.3s ease;
         }
-        .valid { background-color: #00ff00; color: black; border: 2px solid #00ff00; }
-        .invalid { background-color: #ff0000; color: white; border: 2px solid #ff0000; }
-        .loading { background-color: #333; color: #aaa; border: 1px dashed #555; }
-        
-        .detail-row {
-            display: flex;
-            justify-content: space-between;
-            border-bottom: 1px solid #333;
-            padding: 10px 0;
-            text-align: left;
-        }
-        .label { color: #888; font-size: 0.9em; }
-        .value { font-weight: bold; color: #fff; }
-        
-        .payment-alert {
-            margin-top: 15px;
-            padding: 10px;
-            background: #ffcc00;
-            color: black;
-            font-weight: bold;
-            display: none; /* Standardmäßig versteckt */
-        }
+        /* Status Farben dezent aber klar */
+        .valid { border: 1px solid #00ff00; color: #00ff00; background: rgba(0, 255, 0, 0.05); }
+        .invalid { border: 1px solid #ff0000; color: #ff0000; background: rgba(255, 0, 0, 0.05); }
+        .loading { border: 1px solid #333; color: #666; }
 
-        #logo {
-            max-width: 150px;
-            margin-bottom: 20px;
+        .details-container {
+            text-align: left;
+            margin-top: 20px;
+            border-top: 1px solid #222;
+        }
+        .detail { 
+            display: flex; 
+            justify-content: space-between; 
+            border-bottom: 1px solid #111; 
+            padding: 12px 0; 
+            font-size: 13px; 
+        }
+        .label { color: #555; text-transform: uppercase; letter-spacing: 1px; font-size: 11px; }
+        .value { color: #eee; font-weight: 400; }
+        
+        /* Highlight für Barzahlung */
+        .payment-warning { 
+            background: #ffffff; 
+            color: #000000; 
+            padding: 15px; 
+            margin-top: 30px; 
+            font-weight: 700; 
+            font-size: 12px;
+            letter-spacing: 1px;
+            display: none; 
+            text-transform: uppercase;
         }
     </style>
 </head>
 <body>
-
     <div class="card">
-        <h2>TICKET CHECK</h2>
+        <img src="ignition_logo.png" id="logo" alt="IGNITION">
         
-        <div id="status" class="status-box loading">
-            Lade Daten...
-        </div>
-
-        <div id="details" style="display:none;">
-            <div class="detail-row">
-                <span class="label">Name:</span>
-                <span class="value" id="name">-</span>
-            </div>
-            <div class="detail-row">
-                <span class="label">Fahrzeug:</span>
-                <span class="value" id="car">-</span>
-            </div>
-            <div class="detail-row">
-                <span class="label">Kennzeichen:</span>
-                <span class="value" id="plate">-</span>
-            </div>
-            <div class="detail-row">
-                <span class="label">Parkplatz:</span>
-                <span class="value" id="parking">-</span>
-            </div>
-            <div class="detail-row">
-                <span class="label">Zahlung:</span>
-                <span class="value" id="payment">-</span>
-            </div>
+        <div id="status" class="status-box loading">Authentifizierung...</div>
+        
+        <div id="details" style="display:none;" class="details-container">
+            <div class="detail"><span class="label">Besucher</span> <span id="name" class="value">-</span></div>
+            <div class="detail"><span class="label">Fahrzeug</span> <span id="car" class="value">-</span></div>
+            <div class="detail"><span class="label">Kennzeichen</span> <span id="plate" class="value">-</span></div>
+            <div class="detail"><span class="label">Stellplatz</span> <span id="parking" class="value">-</span></div>
+            <div class="detail"><span class="label">Status</span> <span id="payment" class="value">-</span></div>
             
-            <div id="pay-warning" class="payment-alert">
-                ⚠️ VOR ORT ZAHLEN ⚠️
-            </div>
+            <div id="pay-warning" class="payment-warning">Kassieren: Betrag offen (Bar)</div>
         </div>
-        
-        <br>
-        <button onclick="window.location.href='https://allwetter.co'" style="padding:10px; background:#333; color:#fff; border:none; border-radius:5px;">Neuer Scan (Browser neu laden)</button>
     </div>
 
     <script>
-        // HIER DEINE GOOGLE SCRIPT URL EINFÜGEN:
-        const SCRIPT_URL = "HIER_DIE_URL_VON_SCHRITT_2_EINFÜGEN";
+        // DEIN LINK HIER EINSETZEN:
+        const SCRIPT_URL = "DEIN_GOOGLE_APPS_SCRIPT_LINK_HIER"; 
 
-        function getParameterByName(name) {
-            const url = new URL(window.location.href);
-            return url.searchParams.get(name);
-        }
-
-        async function checkTicket() {
-            const ticketId = getParameterByName('id');
-            const statusBox = document.getElementById('status');
+        async function check() {
+            const id = new URLSearchParams(window.location.search).get('id');
+            const status = document.getElementById('status');
             
-            if (!ticketId) {
-                statusBox.className = "status-box invalid";
-                statusBox.innerText = "KEIN CODE";
-                return;
+            if(!id) { 
+                status.className="status-box invalid"; 
+                status.innerText="Code fehlt"; 
+                return; 
             }
 
             try {
-                // Daten von Google Sheet abrufen
-                const response = await fetch(`${SCRIPT_URL}?id=${ticketId}`);
-                const data = await response.json();
-
-                if (data.valid) {
-                    statusBox.className = "status-box valid";
-                    statusBox.innerText = "GÜLTIG ✔";
+                const res = await fetch(`${SCRIPT_URL}?id=${id}`);
+                const json = await res.json();
+                
+                if(json.valid) {
+                    status.className="status-box valid"; 
+                    status.innerText="Zutritt gewährt";
                     
-                    // Daten anzeigen
                     document.getElementById('details').style.display = 'block';
-                    document.getElementById('name').innerText = data.data.name;
-                    document.getElementById('car').innerText = data.data.car;
-                    document.getElementById('plate').innerText = data.data.plate;
-                    document.getElementById('parking').innerText = data.data.parking;
-                    document.getElementById('payment').innerText = data.data.payment;
+                    document.getElementById('name').innerText = json.data.name;
+                    document.getElementById('car').innerText = json.data.car;
+                    document.getElementById('plate').innerText = json.data.plate;
+                    document.getElementById('parking').innerText = json.data.parking;
+                    document.getElementById('payment').innerText = json.data.payment;
 
-                    // Warnung wenn Barzahlung nötig
-                    const paymentStatus = data.data.payment.toLowerCase();
-                    if (paymentStatus.includes("bar") || paymentStatus.includes("offen") || paymentStatus.includes("vor ort")) {
-                        document.getElementById('pay-warning').style.display = 'block';
+                    // Prüft ob "bar" im Payment-Feld steht
+                    const payStr = json.data.payment.toLowerCase();
+                    if(payStr.includes("bar") || payStr.includes("offen")) {
+                        document.getElementById('pay-warning').style.display='block';
                     }
-
                 } else {
-                    statusBox.className = "status-box invalid";
-                    statusBox.innerText = "UNGÜLTIG ❌";
+                    status.className="status-box invalid"; 
+                    status.innerText="Ungültiges Ticket";
                 }
-
-            } catch (error) {
-                console.error(error);
-                statusBox.className = "status-box invalid";
-                statusBox.innerText = "FEHLER";
+            } catch(e) { 
+                status.innerText="Systemfehler"; 
             }
         }
-
-        // Starten sobald die Seite lädt
-        window.onload = checkTicket;
+        window.onload = check;
     </script>
 </body>
 </html>
