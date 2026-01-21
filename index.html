@@ -5,11 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>IGNITION Ticket Check</title>
     <style>
-        /* Clean & Minimal Design */
+        /* Hell & Clean Helvetica Design */
         body { 
             font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; 
-            background-color: #050505; 
-            color: #ffffff; 
+            background-color: #ffffff; 
+            color: #000000; 
             display: flex;
             align-items: center;
             justify-content: center;
@@ -25,42 +25,41 @@
         }
         #logo { 
             max-width: 220px; 
-            margin-bottom: 50px; 
+            margin-bottom: 40px; 
+            /* Da dein Logo weiß ist, brauchen wir für den hellen Hintergrund einen dunklen Filter */
+            filter: invert(1);
         }
         .status-box { 
             padding: 15px; 
             margin-bottom: 30px; 
-            border-radius: 4px; 
+            border-radius: 0px; 
             font-weight: 600; 
             font-size: 14px; 
             letter-spacing: 2px;
             text-transform: uppercase;
-            transition: all 0.3s ease;
         }
-        /* Status Farben dezent aber klar */
-        .valid { border: 1px solid #00ff00; color: #00ff00; background: rgba(0, 255, 0, 0.05); }
-        .invalid { border: 1px solid #ff0000; color: #ff0000; background: rgba(255, 0, 0, 0.05); }
-        .loading { border: 1px solid #333; color: #666; }
+        .valid { border: 2px solid #000; color: #fff; background: #000; }
+        .invalid { border: 2px solid #ff0000; color: #ff0000; background: transparent; }
+        .loading { border: 1px solid #eee; color: #999; }
 
         .details-container {
             text-align: left;
             margin-top: 20px;
-            border-top: 1px solid #222;
+            border-top: 1px solid #eee;
         }
         .detail { 
             display: flex; 
             justify-content: space-between; 
-            border-bottom: 1px solid #111; 
-            padding: 12px 0; 
+            border-bottom: 1px solid #fafafa; 
+            padding: 15px 0; 
             font-size: 13px; 
         }
-        .label { color: #555; text-transform: uppercase; letter-spacing: 1px; font-size: 11px; }
-        .value { color: #eee; font-weight: 400; }
+        .label { color: #999; text-transform: uppercase; letter-spacing: 1px; font-size: 10px; }
+        .value { color: #000; font-weight: 500; }
         
-        /* Highlight für Barzahlung */
         .payment-warning { 
-            background: #ffffff; 
-            color: #000000; 
+            background: #ff0000; 
+            color: #ffffff; 
             padding: 15px; 
             margin-top: 30px; 
             font-weight: 700; 
@@ -74,61 +73,43 @@
 <body>
     <div class="card">
         <img src="ignition_logo.png" id="logo" alt="IGNITION">
-        
         <div id="status" class="status-box loading">Authentifizierung...</div>
-        
         <div id="details" style="display:none;" class="details-container">
             <div class="detail"><span class="label">Besucher</span> <span id="name" class="value">-</span></div>
             <div class="detail"><span class="label">Fahrzeug</span> <span id="car" class="value">-</span></div>
             <div class="detail"><span class="label">Kennzeichen</span> <span id="plate" class="value">-</span></div>
             <div class="detail"><span class="label">Stellplatz</span> <span id="parking" class="value">-</span></div>
             <div class="detail"><span class="label">Status</span> <span id="payment" class="value">-</span></div>
-            
             <div id="pay-warning" class="payment-warning">Kassieren: Betrag offen (Bar)</div>
         </div>
     </div>
-
     <script>
-        // DEIN LINK HIER EINSETZEN:
         const SCRIPT_URL = "DEIN_GOOGLE_APPS_SCRIPT_LINK_HIER"; 
-
         async function check() {
             const id = new URLSearchParams(window.location.search).get('id');
             const status = document.getElementById('status');
-            
-            if(!id) { 
-                status.className="status-box invalid"; 
-                status.innerText="Code fehlt"; 
-                return; 
-            }
-
+            if(!id) { status.className="status-box invalid"; status.innerText="Code fehlt"; return; }
             try {
                 const res = await fetch(`${SCRIPT_URL}?id=${id}`);
                 const json = await res.json();
-                
                 if(json.valid) {
                     status.className="status-box valid"; 
                     status.innerText="Zutritt gewährt";
-                    
                     document.getElementById('details').style.display = 'block';
                     document.getElementById('name').innerText = json.data.name;
                     document.getElementById('car').innerText = json.data.car;
                     document.getElementById('plate').innerText = json.data.plate;
                     document.getElementById('parking').innerText = json.data.parking;
                     document.getElementById('payment').innerText = json.data.payment;
-
-                    // Prüft ob "bar" im Payment-Feld steht
                     const payStr = json.data.payment.toLowerCase();
                     if(payStr.includes("bar") || payStr.includes("offen")) {
                         document.getElementById('pay-warning').style.display='block';
                     }
                 } else {
                     status.className="status-box invalid"; 
-                    status.innerText="Ungültiges Ticket";
+                    status.innerText="Ungültig";
                 }
-            } catch(e) { 
-                status.innerText="Systemfehler"; 
-            }
+            } catch(e) { status.innerText="Systemfehler"; }
         }
         window.onload = check;
     </script>
