@@ -2,10 +2,10 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>IGNITION Ticket Check</title>
     <style>
-        /* Hell & Clean Helvetica Design */
+        /* Grunddesign: Helvetica, Hell, Sauber */
         body { 
             font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; 
             background-color: #ffffff; 
@@ -15,102 +15,197 @@
             justify-content: center;
             min-height: 100vh;
             margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
             -webkit-font-smoothing: antialiased;
         }
+
         .card { 
-            width: 90%;
-            max-width: 380px;
-            padding: 40px 20px;
+            width: 100%;
+            max-width: 400px; /* Perfekte Breite für Handys */
             text-align: center;
         }
-        #logo { 
-            max-width: 220px; 
-            margin-bottom: 40px; 
-            /* Da dein Logo weiß ist, brauchen wir für den hellen Hintergrund einen dunklen Filter */
-            filter: invert(1);
-        }
-        .status-box { 
-            padding: 15px; 
-            margin-bottom: 30px; 
-            border-radius: 0px; 
-            font-weight: 600; 
-            font-size: 14px; 
-            letter-spacing: 2px;
-            text-transform: uppercase;
-        }
-        .valid { border: 2px solid #000; color: #fff; background: #000; }
-        .invalid { border: 2px solid #ff0000; color: #ff0000; background: transparent; }
-        .loading { border: 1px solid #eee; color: #999; }
 
+        /* Logo Einstellungen */
+        #logo { 
+            max-width: 200px; 
+            height: auto;
+            margin-bottom: 30px; 
+            /* Filter: Macht dein weißes Logo schwarz für den hellen Hintergrund */
+            filter: invert(1); 
+        }
+        
+        /* DESIGN DER STATUS BOXEN */
+        .status-box { 
+            padding: 20px 15px; 
+            margin-bottom: 25px; 
+            border-radius: 15px; /* Schön abgerundet */
+            font-weight: 700; 
+            font-size: 18px; 
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1); /* Leichter Schatten */
+        }
+        
+        /* GÜLTIG: Grüner Hintergrund, weiße Schrift */
+        .valid { 
+            background-color: #28a745; 
+            color: #ffffff; 
+            border: none;
+        }
+        
+        /* UNGÜLTIG: Roter Hintergrund, weiße Schrift */
+        .invalid { 
+            background-color: #dc3545; 
+            color: #ffffff; 
+            border: none;
+        }
+        
+        /* LÄDT: Grau */
+        .loading { 
+            background-color: #f8f9fa; 
+            color: #6c757d; 
+            border: 1px solid #dee2e6;
+            font-size: 14px;
+        }
+
+        /* Container für die Daten (Name, Auto, etc.) */
         .details-container {
             text-align: left;
-            margin-top: 20px;
-            border-top: 1px solid #eee;
+            margin-top: 10px;
+            background: #ffffff;
+            border-radius: 12px;
+            padding: 5px 15px;
+            border: 1px solid #eeeeee;
         }
+        
         .detail { 
             display: flex; 
-            justify-content: space-between; 
-            border-bottom: 1px solid #fafafa; 
-            padding: 15px 0; 
-            font-size: 13px; 
+            flex-direction: column; /* Label oben, Wert unten */
+            border-bottom: 1px solid #f4f4f4; 
+            padding: 12px 0; 
         }
-        .label { color: #999; text-transform: uppercase; letter-spacing: 1px; font-size: 10px; }
-        .value { color: #000; font-weight: 500; }
+        .detail:last-child { border-bottom: none; }
         
+        .label { 
+            color: #999999; 
+            text-transform: uppercase; 
+            letter-spacing: 1px; 
+            font-size: 10px; 
+            margin-bottom: 5px; 
+            font-weight: 600;
+        }
+        
+        .value { 
+            color: #000000; 
+            font-weight: 600; 
+            font-size: 16px; 
+        }
+        
+        /* Warnung für Barzahler (Gelb/Schwarz) */
         .payment-warning { 
-            background: #ff0000; 
-            color: #ffffff; 
+            background: #ffcc00; 
+            color: #000000; 
             padding: 15px; 
-            margin-top: 30px; 
-            font-weight: 700; 
-            font-size: 12px;
-            letter-spacing: 1px;
-            display: none; 
+            margin-top: 25px; 
+            border-radius: 12px;
+            font-weight: 800; 
+            font-size: 14px;
+            display: none; /* Erstmal unsichtbar */
             text-transform: uppercase;
+            border: 2px solid #000;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
         }
     </style>
 </head>
 <body>
     <div class="card">
-        <img src="ignition_logo.png" id="logo" alt="IGNITION">
-        <div id="status" class="status-box loading">Authentifizierung...</div>
+        <img src="ignition logo.png" id="logo" alt="IGNITION">
+        
+        <div id="status" class="status-box loading">Warte auf Scan...</div>
+        
         <div id="details" style="display:none;" class="details-container">
-            <div class="detail"><span class="label">Besucher</span> <span id="name" class="value">-</span></div>
-            <div class="detail"><span class="label">Fahrzeug</span> <span id="car" class="value">-</span></div>
-            <div class="detail"><span class="label">Kennzeichen</span> <span id="plate" class="value">-</span></div>
-            <div class="detail"><span class="label">Stellplatz</span> <span id="parking" class="value">-</span></div>
-            <div class="detail"><span class="label">Status</span> <span id="payment" class="value">-</span></div>
-            <div id="pay-warning" class="payment-warning">Kassieren: Betrag offen (Bar)</div>
+            <div class="detail">
+                <span class="label">Besucher</span> 
+                <span id="name" class="value">-</span>
+            </div>
+            <div class="detail">
+                <span class="label">Fahrzeug</span> 
+                <span id="car" class="value">-</span>
+            </div>
+            <div class="detail">
+                <span class="label">Kennzeichen</span> 
+                <span id="plate" class="value">-</span>
+            </div>
+            <div class="detail">
+                <span class="label">Stellplatz</span> 
+                <span id="parking" class="value">-</span>
+            </div>
+            <div class="detail">
+                <span class="label">Bezahlstatus</span> 
+                <span id="payment" class="value">-</span>
+            </div>
         </div>
+        
+        <div id="pay-warning" class="payment-warning">⚠️ ACHTUNG: BETRAG OFFEN</div>
     </div>
+
     <script>
-        const SCRIPT_URL = "DEIN_GOOGLE_APPS_SCRIPT_LINK_HIER"; 
+        // *** HIER DEINE GOOGLE SCRIPT URL REINKOPIEREN: ***
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyeA_248O3CtWAGBUyUvuPU8gkbsNdB0H9ChQPhvGZ5tYcon-5rb-KagJIMzVjtDymo/exec"; 
+
         async function check() {
             const id = new URLSearchParams(window.location.search).get('id');
             const status = document.getElementById('status');
-            if(!id) { status.className="status-box invalid"; status.innerText="Code fehlt"; return; }
+            
+            // Wenn keine ID im Link ist
+            if(!id) { 
+                status.className="status-box loading"; 
+                status.innerText="Scanner Bereit"; 
+                return; 
+            }
+            
+            status.innerText="Prüfe Ticket...";
+            
             try {
+                // Daten abrufen
                 const res = await fetch(`${SCRIPT_URL}?id=${id}`);
                 const json = await res.json();
+                
                 if(json.valid) {
+                    // *** GÜLTIG ***
                     status.className="status-box valid"; 
-                    status.innerText="Zutritt gewährt";
+                    status.innerText="✓ ZUTRITT GEWÄHRT";
+                    
+                    // Details anzeigen
                     document.getElementById('details').style.display = 'block';
                     document.getElementById('name').innerText = json.data.name;
                     document.getElementById('car').innerText = json.data.car;
                     document.getElementById('plate').innerText = json.data.plate;
                     document.getElementById('parking').innerText = json.data.parking;
                     document.getElementById('payment').innerText = json.data.payment;
-                    const payStr = json.data.payment.toLowerCase();
-                    if(payStr.includes("bar") || payStr.includes("offen")) {
+                    
+                    // Prüfung auf Barzahlung / Offen
+                    const payStr = String(json.data.payment).toLowerCase();
+                    if(payStr.includes("bar") || payStr.includes("offen") || payStr.includes("nicht")) {
                         document.getElementById('pay-warning').style.display='block';
+                    } else {
+                        document.getElementById('pay-warning').style.display='none';
                     }
                 } else {
+                    // *** UNGÜLTIG ***
                     status.className="status-box invalid"; 
-                    status.innerText="Ungültig";
+                    status.innerText="✕ TICKET UNGÜLTIG";
+                    document.getElementById('details').style.display = 'none';
+                    document.getElementById('pay-warning').style.display='none';
                 }
-            } catch(e) { status.innerText="Systemfehler"; }
+            } catch(e) { 
+                status.className="status-box invalid";
+                status.innerText="Systemfehler"; 
+                console.log(e);
+            }
         }
+        // Startet den Check automatisch beim Laden
         window.onload = check;
     </script>
 </body>
